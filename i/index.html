@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>好友邀請你一起玩</title>
+<meta property="og:title" content="好友邀請你一起玩">
+<meta property="og:description" content="用好友的邀請碼下載，馬上拿新手禮">
+<style>
+:root{--bg:#0d1020;--card:#1b2140;--text:#eef2ff;--sub:#aab4d8;--accent:#ffd36a;--ink:#2a1a00}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;line-height:1.6;display:flex;align-items:center;justify-content:center}
+main{width:100%;max-width:420px;padding:28px 16px 40px;text-align:center}
+.icon{width:112px;height:112px;border-radius:26px;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+h1{font-size:24px;margin:16px 0 4px}
+.lead{color:var(--sub);margin:0 0 18px}
+.gift{background:var(--card);border-radius:16px;padding:14px 16px;margin-bottom:16px}
+.gift b{color:var(--accent);font-size:18px}
+.code{font-size:40px;font-weight:900;letter-spacing:8px;background:var(--card);border:2px dashed var(--accent);border-radius:14px;padding:10px 0;margin:8px 0 6px;-webkit-user-select:all;user-select:all}
+.hint{color:var(--sub);font-size:13px;margin:0 0 18px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:15px;font:inherit;font-size:17px;font-weight:800;cursor:pointer;text-decoration:none;margin-top:10px}
+.main{background:var(--accent);color:var(--ink)}
+.ghost{background:transparent;color:var(--sub);border:1px solid var(--sub);font-weight:600;font-size:15px}
+.steps{text-align:left;color:var(--sub);font-size:14px;background:var(--card);border-radius:14px;padding:12px 16px 12px 34px;margin-top:20px}
+.steps li{margin:4px 0}
+.toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%);background:#000c;color:#fff;padding:10px 18px;border-radius:20px;font-size:14px;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.on{opacity:1}
+.err{color:var(--sub)}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div class="toast" id="toast"></div>
+<script>
+// 好友邀請頁：https://weo001.github.io/i/?g=遊戲代號&c=邀請碼
+const GAMES = {
+  guishi: { name: '鬼市大作戰', id: '6829423871', scheme: 'weo-guishi', gift: '💎60＋🪙3,000', desc: '台灣鬼月夜市・爽快割草生存戰', accent: '#ffcf4d', bg: '#140d1c', card: '#2a1830' },
+  maohai: { name: '毛孩太空救援隊', id: '6829633658', scheme: 'weo-maohai', gift: '800 ⭐ 星星', desc: '可愛毛孩開戰機・彈幕射擊', accent: '#7fd8ff', bg: '#0b1230', card: '#1a2450', ink: '#06203a' },
+  sanguo: { name: '三國守城記', id: '6829424010', scheme: 'weo-sanguo', gift: '趙雲提前加入＋劉備造型 3 天體驗', desc: '三國演義塔防', accent: '#ffcb6b', bg: '#1a120c', card: '#33241a' },
+  wanjian: { name: '萬劍誅魔', id: '6829613354', scheme: 'weo-wanjian', gift: '💎150 仙玉', desc: '仙俠放置・萬劍齊發爽快誅妖', accent: '#9fe7ff', bg: '#0a141c', card: '#162a36', ink: '#04202c' },
+};
+const ALPHA = /^[A-HJKMNP-Z2-9]{6}$/;
+const q = new URLSearchParams(location.search);
+const g = GAMES[q.get('g')];
+const code = String(q.get('c') || '').toUpperCase();
+const app = document.getElementById('app');
+const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+function toast(t) {
+  const el = document.getElementById('toast');
+  el.textContent = t; el.classList.add('on');
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2200);
+}
+async function copy(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch {}
+  try {
+    const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch { return false; }
+}
+
+if (!g) {
+  app.innerHTML = `<h1>找不到這個遊戲</h1><p class="err">連結可能不完整，請跟朋友再要一次。</p><a class="btn ghost" href="https://weo001.github.io/">看看我們的遊戲</a>`;
+} else {
+  const r = document.documentElement.style;
+  r.setProperty('--accent', g.accent); r.setProperty('--bg', g.bg); r.setProperty('--card', g.card);
+  if (g.ink) r.setProperty('--ink', g.ink);
+  document.title = `好友邀請你玩《${g.name}》`;
+  const store = `https://apps.apple.com/app/id${g.id}`;
+  const ok = ALPHA.test(code);
+  app.innerHTML = `
+<img class="icon" src="${q.get('g')}.jpg" alt="">
+<h1>好友邀請你玩《${esc(g.name)}》</h1>
+<p class="lead">${esc(g.desc)}</p>
+${ok ? `
+<div class="gift">用邀請碼開始玩，馬上拿<br><b>${esc(g.gift)}</b></div>
+<div>好友的邀請碼</div>
+<div class="code">${code}</div>
+<p class="hint">按下面的按鈕會自動複製邀請碼</p>
+<button class="btn main" id="dl">複製邀請碼並下載</button>
+<button class="btn ghost" id="open">已經裝了？打開遊戲</button>
+<ol class="steps">
+  <li>按「複製邀請碼並下載」，安裝遊戲</li>
+  <li>打完第一局，會問「朋友邀請你來的嗎？」</li>
+  <li>按「貼上邀請碼」→「送出」，禮物馬上到手</li>
+</ol>
+<p class="hint" style="margin-top:14px">只限新玩家，開始玩的 3 天內輸入。iPhone 版限定。</p>` : `
+<p class="err">邀請碼看起來不完整，請跟朋友再要一次。</p>
+<a class="btn main" href="${store}">直接下載</a>`}`;
+  if (ok) {
+    document.getElementById('dl').onclick = async () => {
+      const done = await copy(code);
+      toast(done ? '已複製邀請碼 ' + code : '請長按上面的邀請碼複製');
+      setTimeout(() => { location.href = store; }, done ? 700 : 1600);
+    };
+    document.getElementById('open').onclick = async () => {
+      await copy(code);
+      location.href = `${g.scheme}://invite?c=${code}`;
+    };
+  }
+}
+</script>
+</body>
+</html>

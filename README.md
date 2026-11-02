@@ -7,3 +7,4 @@
 
 改完在這個資料夾 git add -A、commit、push，約 1 分鐘生效。
 - `studio.json`：遊戲裡「邀請好友」連的伺服器網址（`invite`）。空的就代表還沒開放。換伺服器只要改這個檔，不用重新上架。說明看 `Desktop\claude\行銷推廣\`。
+- `i/`：好友邀請頁 `https://weo001.github.io/i/?g=遊戲代號&c=邀請碼`。遊戲裡「分享給朋友」分享的就是這個網址。按「複製邀請碼並下載」會複製邀請碼、跳 App Store；「打開遊戲」用 `weo-遊戲代號://invite?c=碼` 打開已安裝的遊戲。新遊戲要在 `index.html` 的 `GAMES` 加一行、放一張 256px 圖示 `代號.jpg`。
